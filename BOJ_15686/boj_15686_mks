@@ -1,0 +1,34 @@
+# BOJ_15686 치킨 문제
+# 20:23 ~ 21:00
+
+
+import sys; input = sys.stdin.readline
+from itertools import combinations
+
+
+# main
+N, M = map(int, input().split())
+chicken = []
+home = []
+for i in range(N):
+    temp = list(map(int, input().split()))
+    for j in range(N):
+        if temp[j] == 2:
+            chicken.append([i, j])
+        elif temp[j] == 1:
+            home.append([i, j])
+
+answer = 1e9
+candidates = combinations(chicken, M)
+for c in candidates:
+    distance = 0
+    for hy, hx in home:
+        min_dist = 1e9
+        for cy, cx in c:
+            min_dist = min(min_dist, abs(cy-hy) + abs(cx-hx))
+
+        distance += min_dist
+
+    answer = min(answer, distance)
+
+print(answer)
