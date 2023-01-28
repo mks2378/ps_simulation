@@ -1,0 +1,76 @@
+import sys; input = sys.stdin.readline
+from collections import deque
+
+dy = (0, 1, 0, -1)
+dx = (1, 0, -1, 0)
+
+
+def is_in_board(y, x):
+    if 0<=y<N and 0<=x<M:
+        return True
+    else:
+        return False
+
+
+def get_moved_dice(dice, direction):
+    if direction == 0:  # 동
+        new_dice = [dice[0], dice[4], dice[2], dice[5], dice[3], dice[1]]
+    elif direction == 1:  # 남
+        new_dice = [dice[3], dice[0], dice[1], dice[2], dice[4], dice[5]]
+    elif direction == 2:  # 서
+        new_dice = [dice[0], dice[5], dice[2], dice[4], dice[1], dice[3]]
+    elif direction == 3:  # 북
+        new_dice = [dice[1], dice[2], dice[3], dice[0], dice[4], dice[5]]
+
+    return new_dice
+
+
+def get_block_cnt(y, x):
+    q = deque([[y, x]])
+    b_visited = [[0]*M for _ in range(N)]
+    b_visited[y][x] = 1
+    cnt = 1
+
+    while q:
+        by, bx = q.popleft()
+        for d in range(4):
+            ny, nx = by + dy[d], bx + dx[d]
+            if is_in_board(ny, nx) and not b_visited[ny][nx] and board[ny][nx] == board[by][bx]:
+                q.append([ny, nx])
+                b_visited[ny][nx] = 1
+                cnt+=1
+
+    return cnt
+
+
+# main
+N, M, K = map(int, input().split())
+board = [list(map(int, input().split())) for _ in range(N)]
+
+answer = 0
+cur_d = 0  # 0:동, 1:남, 2:서, 3:북
+cy, cx = 0, 0
+dice = [2, 1, 5, 6, 4, 3]
+for _ in range(K):
+    # 주사위 이동
+    ny, nx = cy + dy[cur_d], cx + dx[cur_d]
+    if is_in_board(ny, nx):
+        dice = get_moved_dice(dice, cur_d)
+        cy, cx = ny, nx
+    else:
+        cur_d = (cur_d+2)%4
+        dice = get_moved_dice(dice, cur_d)
+        cy, cx = cy + dy[cur_d], cx + dx[cur_d]
+
+    # 점수 획득
+    answer += board[cy][cx] * get_block_cnt(cy, cx)
+
+    # 다음 이동 방향 설정
+    bottom_dice_num = dice[3]  # A
+    board_num = board[cy][cx]  # B
+    if bottom_dice_num > board_num:
+        cur_d = (cur_d+1)%4
+    elif bottom_dice_num < board_num:
+        cur_d = (cur_d-1)%4
+
+print(answer)
